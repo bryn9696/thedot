@@ -10,70 +10,100 @@ import java.util.TimerTask;
 @Service
 public class DotService {
 
-    private static final int DOT_SIZE = 50; // Size of the dot
-    private static final int GAME_AREA_WIDTH = 800; // Width of the game area
-    private static final int GAME_AREA_HEIGHT = 600; // Height of the game area
-    private Dot dot; // Current dot
-    private boolean gameOver; // Track if the game is over
-    private Timer dotTimer; // Timer for moving the dot
+    private static final int DOT_SIZE = 50;
+    private static final int MOVE_SPEED = 10; // Speed of movement
+    private Dot dot;
+    private long startTime;
+    private long elapsedTime;
+    private Timer timer;
+    private boolean gameOver;
+    private int currentDirection = 0; // 0: right, 1: down, 2: left, 3: up
+    private int moveX = MOVE_SPEED; // Initial horizontal movement speed
+    private int moveY = MOVE_SPEED; // Initial vertical movement speed
 
     public DotService() {
-        this.dot = new Dot(0, 0); // Initial dot position
+        this.dot = new Dot(0, 0);
         this.gameOver = false;
+        startGame(); // Initialize the dot position on service creation
     }
 
-    // Start the game and move the dot periodically
     public void startGame() {
         Random random = new Random();
-        moveDotRandomly(); // Move the dot initially
+        dot.setX(random.nextInt(800 - DOT_SIZE)); // Set dot within the window size
+        dot.setY(random.nextInt(600 - DOT_SIZE)); // Set dot within the window size
+        moveX = MOVE_SPEED; // Reset horizontal movement direction
+        moveY = MOVE_SPEED; // Reset vertical movement direction
         gameOver = false;
+        elapsedTime = 0;
 
-        if (dotTimer != null) {
-            dotTimer.cancel(); // Cancel any previous timer
-        }
-
-        dotTimer = new Timer();
-        dotTimer.scheduleAtFixedRate(new TimerTask() {
-            @Override
-            public void run() {
-                if (!gameOver) {
-                    moveDotRandomly();
-                }
-            }
-        }, 0, 1000); // Move the dot every 1 second
+        // Start the upward-counting timer
+        startTimer();
+        startDotMovement(); // Start moving the dot
     }
 
-    // Move the dot to a random position within the game area
-    private void moveDotRandomly() {
-        Random random = new Random();
-        dot.setX(random.nextInt(GAME_AREA_WIDTH - DOT_SIZE));
-        dot.setY(random.nextInt(GAME_AREA_HEIGHT - DOT_SIZE));
-        System.out.println("Moving dot to: x=" + dot.getX() + ", y=" + dot.getY());
-    }
-
-    // Get the current dot position
     public Dot getDot() {
         return dot;
     }
 
-    // Handle a user clicking on the dot
     public boolean clickDot(int mouseX, int mouseY) {
-        int hitArea = 20; // Buffer area around the dot for easier clicking
+        int hitArea = 20; // Increased hit area for easier clicking
         boolean isHit = (mouseX >= dot.getX() - hitArea && mouseX <= dot.getX() + DOT_SIZE + hitArea) &&
                 (mouseY >= dot.getY() - hitArea && mouseY <= dot.getY() + DOT_SIZE + hitArea);
 
         if (isHit) {
-            gameOver = true; // End the game if the dot is clicked
-            if (dotTimer != null) {
-                dotTimer.cancel();
-            }
+            gameOver = true;
             return true;
+        } else {
+            return false;
         }
-        return false;
     }
 
-    // Check if the game is over
     public boolean isGameOver() {
         return gameOver;
+    }
+
+    public long getElapsedTime() {
+        return elapsedTime;
+    }
+
+    private void startTimer() {
+        timer = new Timer();
+        startTime = System.currentTimeMillis();
+
+        TimerTask task = new TimerTask() {
+            @Override
+            public void run() {
+                if (!gameOver) {
+                    elapsedTime = System.currentTimeMillis() - startTime;
+                }
+            }
+        };
+        timer.scheduleAtFixedRate(task, 0, 1000); // Update every second for time tracking
+    }
+
+    private void startDotMovement() {
+        Timer dotMovementTimer = new Timer();
+        dotMovementTimer.scheduleAtFixedRate(new TimerTask() {
+            @Override
+            public void run() {
+                if (!gameOver) {
+                    moveDot();
+                }
+            }
+        }, 0, 50); // Update position every 50ms
+    }
+
+    private void moveDot() {
+        // Update dot's position
+        dot.setX(dot.getX() + moveX);
+        dot.setY(dot.getY() + moveY);
+
+        // Check for boundary collisions
+        if (dot.getX() < 0 || dot.getX() > 800 - DOT_SIZE) {
+            moveX = -moveX; // Reverse direction on x-axis
+        }
+        if (dot.getY() < 0 || dot.getY() > 600 - DOT_SIZE) {
+            moveY = -moveY; // Reverse direction on y-axis
+        }
     }
 }

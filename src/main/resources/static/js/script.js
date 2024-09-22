@@ -1,103 +1,89 @@
 const gameArea = document.getElementById('gameArea');
-const startButton = document.getElementById('startButton');
-const timerDisplay = document.getElementById('timerDisplay');
-const DOT_SIZE = 50;
-let timer;
-let startTime;
+const DOT_SIZE = 20; // Size of the dot
+const TIMER_INTERVAL = 1000 / 60; // 60 FPS for smooth movement
 
-// Add event listener to the Start button
-startButton.addEventListener('click', startGame);
+let dot = document.createElement('div');
+dot.classList.add('dot');
+gameArea.appendChild(dot);
 
-// Start the game by making a request to the backend and initializing the timer
-function startGame() {
-    fetch('/api/start')
-        .then(response => response.text())
-        .then(message => {
-            console.log(message);
-            fetchDot();  // Fetch the initial dot position
-            startTimer();  // Start the game timer
-            setInterval(fetchDot, 1000);  // Periodically update the dot position
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+// Message display element
+const messageDisplay = document.getElementById('messageDisplay');
+
+// Dot movement variables
+let posX = Math.random() * (gameArea.clientWidth - DOT_SIZE);
+let posY = Math.random() * (gameArea.clientHeight - DOT_SIZE);
+let velocityX = 2; // Change to adjust speed
+let velocityY = 2; // Change to adjust speed
+
+// Game state variables
+let clickCount = 0;
+const MAX_CLICKS = 5; // Maximum allowed clicks
+let gameOver = false;
+
+// Initialize the dot's position
+function initializeDot() {
+    dot.style.left = `${posX}px`;
+    dot.style.top = `${posY}px`;
 }
 
-// Fetch the current dot's position from the backend
-function fetchDot() {
-    fetch('/api/dot')
-        .then(response => response.json())
-        .then(dot => {
-            moveDot(dot.x, dot.y);
-        })
-        .catch(error => {
-            console.error('Error fetching dot:', error);
-        });
+// Move the dot
+function moveDot() {
+    if (gameOver) return; // Stop moving if the game is over
+
+    posX += velocityX;
+    posY += velocityY;
+
+    // Check for boundary collisions
+    if (posX <= 0 || posX >= gameArea.clientWidth - DOT_SIZE) {
+        velocityX *= -1; // Reverse horizontal direction
+    }
+    if (posY <= 0 || posY >= gameArea.clientHeight - DOT_SIZE) {
+        velocityY *= -1; // Reverse vertical direction
+    }
+
+    // Update dot position
+    dot.style.left = `${posX}px`;
+    dot.style.top = `${posY}px`;
 }
 
-// Move the dot or create it if it doesn't exist
-function moveDot(x, y) {
-    let dot = document.querySelector('.dot');
-    if (dot) {
-        dot.style.left = `${x}px`;
-        dot.style.top = `${y}px`;
-    } else {
-        createDot(x, y);
+// Handle mouse click in game area
+function handleGameClick(mouseX, mouseY) {
+    clickCount++;
+
+    // Check if the click is inside the dot
+    const isHit = mouseX >= posX && mouseX <= posX + DOT_SIZE && mouseY >= posY && mouseY <= posY + DOT_SIZE;
+
+    if (isHit) {
+        // Successfully clicked the dot
+        messageDisplay.textContent = "You win!";
+        gameOver = true; // End the game
+    } else if (clickCount >= MAX_CLICKS) {
+        // Reached maximum clicks without hitting the dot
+        gameOver = true;
+        messageDisplay.textContent = "Too many clicks! Game Over.";
     }
 }
 
-// Create a new dot element and position it
-function createDot(x, y) {
-    const dot = document.createElement('div');
-    dot.classList.add('dot');
-    dot.style.left = `${x}px`;
-    dot.style.top = `${y}px`;
-
-    // Attach the click handler to the dot
-    dot.addEventListener('click', (event) => {
-        const rect = gameArea.getBoundingClientRect();
-        const mouseX = event.clientX - rect.left;
-        const mouseY = event.clientY - rect.top;
-        handleDotClick(mouseX, mouseY);
-    });
-
-    gameArea.appendChild(dot);
+// Animation loop
+function animate() {
+    moveDot();
+    requestAnimationFrame(animate);
 }
 
-// Handle the dot click event
-function handleDotClick(mouseX, mouseY) {
-    // Convert to integers
-    const intMouseX = Math.floor(mouseX);
-    const intMouseY = Math.floor(mouseY);
-
-    clickDot(intMouseX, intMouseY);
+// Start the game
+function startGame() {
+    initializeDot();
+    animate();
 }
 
-// Send a request to notify the backend of the dot click
-function clickDot(mouseX, mouseY) {
-    fetch(`/api/click?mouseX=${mouseX}&mouseY=${mouseY}`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-        }
-    })
-    .then(response => response.text())
-    .then(result => {
-        console.log('Response from server:', result);
-    })
-    .catch(error => {
-        console.error('Error:', error);
-    });
-}
+// Add event listener for clicks in the game area
+gameArea.addEventListener('click', (event) => {
+    if (gameOver) return; // Ignore clicks if the game is over
+    const rect = gameArea.getBoundingClientRect();
+    const mouseX = Math.floor(event.clientX - rect.left);
+    const mouseY = Math.floor(event.clientY - rect.top);
+    handleGameClick(mouseX, mouseY);
+});
 
-// Start the timer
-function startTimer() {
-    startTime = Date.now();
-    timer = setInterval(updateTimer, 100);
-}
-
-// Update the timer display
-function updateTimer() {
-    const elapsedTime = Date.now() - startTime;
-    timerDisplay.textContent = `Time: ${(elapsedTime / 1000).toFixed(2)}s`;
-}
+// Call startGame to initialize
+startGame();
