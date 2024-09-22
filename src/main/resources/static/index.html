@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Dot Game</title>
+    <script src="/js/script.js" defer></script>
+    <style>
+        #gameArea {
+            width: 800px;
+            height: 600px;
+            border: 1px solid black;
+            position: relative;
+            background-color: lightgrey;
+        }
+        .dot {
+            position: absolute;
+            background-color: red;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+        }
+        #timerDisplay {
+            font-size: 24px;
+            margin-top: 10px;
+        }
+        #resultsTable {
+            margin-top: 20px;
+            border-collapse: collapse;
+            width: 100%;
+        }
+        #resultsTable th, #resultsTable td {
+            border: 1px solid black;
+            padding: 8px;
+            text-align: center;
+        }
+        #resultsTable th {
+            background-color: #f2f2f2;
+        }
+    </style>
+</head>
+<body>
+<h1>Dot Game</h1>
+<button id="startButton">Start Game</button>
+<div id="gameArea"></div>
+<div id="timerDisplay">Time: 0.00s</div>
+<table id="resultsTable">
+    <tr>
+        <th>Username</th>
+        <th>Score (s.ms)</th>
+    </tr>
+</table>
+</body>
+</html>

@@ -1,0 +1,3 @@
+rootProject.name = 'The_dot'
+include 'frontend'
+
