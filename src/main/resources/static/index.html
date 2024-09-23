@@ -1,55 +1,145 @@
+<!--<!DOCTYPE html>-->
+<!--<html lang="en">-->
+<!--<head>-->
+<!--    <meta charset="UTF-8">-->
+<!--    <meta name="viewport" content="width=device-width, initial-scale=1.0">-->
+<!--    <title>Dot Game</title>-->
+<!--    <script src="/js/script.js" defer></script>-->
+<!--    <style>-->
+<!--        #gameArea {-->
+<!--            width: 800px;-->
+<!--            height: 600px;-->
+<!--            border: 1px solid black;-->
+<!--            position: relative;-->
+<!--            background-color: lightgrey;-->
+<!--        }-->
+<!--        .dot {-->
+<!--            position: absolute;-->
+<!--            background-color: red;-->
+<!--            border-radius: 50%;-->
+<!--            width: 50px;-->
+<!--            height: 50px;-->
+<!--        }-->
+<!--        #timerDisplay {-->
+<!--            font-size: 24px;-->
+<!--            margin-top: 10px;-->
+<!--        }-->
+<!--        #resultsTable {-->
+<!--            margin-top: 20px;-->
+<!--            border-collapse: collapse;-->
+<!--            width: 100%;-->
+<!--        }-->
+<!--        #resultsTable th, #resultsTable td {-->
+<!--            border: 1px solid black;-->
+<!--            padding: 8px;-->
+<!--            text-align: center;-->
+<!--        }-->
+<!--        #resultsTable th {-->
+<!--            background-color: #f2f2f2;-->
+<!--        }-->
+<!--    </style>-->
+<!--</head>-->
+<!--<body>-->
+<!--<h1>Dot Game</h1>-->
+<!--<button id="startButton">Start Game</button>-->
+<!--<div id="gameArea"></div>-->
+<!--<div id="messageDisplay"></div>-->
+<!--<div id="resultsDisplay"></div>-->
+<!--<div id="timerDisplay">Time: 0.00s</div>-->
+<!--<table id="resultsTable">-->
+<!--    <tr>-->
+<!--        <th>Username</th>-->
+<!--        <th>Score (s.ms)</th>-->
+<!--    </tr>-->
+<!--</table>-->
+<!--</body>-->
+<!--</html>-->
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dot Game</title>
-    <script src="/js/script.js" defer></script>l
     <style>
+        body {
+            text-align: center; /* Center align all text */
+        }
+
         #gameArea {
-            width: 800px;
-            height: 600px;
-            border: 1px solid black;
+            width: 600px;
+            height: 400px;
+            background-color: lightgray;
             position: relative;
-            background-color: lightgrey;
+            overflow: hidden;
+            margin: 20px auto;
+            border: 2px solid #000;
         }
+
         .dot {
-            position: absolute;
+            width: 50px; /* Set size of the dot */
+            height: 50px; /* Set size of the dot */
             background-color: red;
-            border-radius: 50%;
-            width: 50px;
-            height: 50px;
+            border-radius: 50%; /* Makes the dot round */
+            position: absolute;
         }
-        #timerDisplay {
-            font-size: 24px;
-            margin-top: 10px;
+
+        #resultsModal {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%; /* Full width */
+            height: 100%; /* Full height */
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0, 0, 0, 0.5); /* Black w/ opacity */
         }
-        #resultsTable {
-            margin-top: 20px;
-            border-collapse: collapse;
+
+        .modal-content {
+            background-color: #fefefe;
+            margin: 15% auto; /* 15% from the top and centered */
+            padding: 20px;
+            border: 1px solid #888;
+            width: 80%; /* Could be more or less, depending on screen size */
+        }
+
+        .resultsTable {
             width: 100%;
+            border-collapse: collapse;
         }
-        #resultsTable th, #resultsTable td {
-            border: 1px solid black;
+
+        .resultsTable th, .resultsTable td {
+            border: 1px solid #ddd;
             padding: 8px;
             text-align: center;
         }
-        #resultsTable th {
-            background-color: #f2f2f2;
+
+        #timerDisplay {
+            font-size: 20px; /* Increase font size for timer */
+            margin-top: 10px; /* Add some spacing above the timer */
+        }
+
+        h1 {
+            margin-bottom: 20px; /* Add some spacing below the title */
         }
     </style>
 </head>
 <body>
-<h1>Dot Game</h1>
-<button id="startButton">Start Game</button>
+<h1>The Dot</h1> <!-- Title -->
 <div id="gameArea"></div>
+<div id="timerDisplay"></div> <!-- Timer display centered under the game area -->
 <div id="messageDisplay"></div>
-<div id="timerDisplay">Time: 0.00s</div>
-<table id="resultsTable">
-    <tr>
-        <th>Username</th>
-        <th>Score (s.ms)</th>
-    </tr>
-</table>
+
+<!-- Modal -->
+<div id="resultsModal">
+    <div class="modal-content">
+        <span class="close" onclick="closeResultsModal()">&times;</span>
+        <h2>Results</h2>
+        <div id="resultsDisplay"></div>
+    </div>
+</div>
+
+<script src="/js/script.js" defer></script>-->
 </body>
 </html>
