@@ -13,8 +13,8 @@ const timerDisplay = document.getElementById('timerDisplay'); // Timer element
 // Dot movement variables
 let posX = Math.random() * (gameArea.clientWidth - DOT_SIZE);
 let posY = Math.random() * (gameArea.clientHeight - DOT_SIZE);
-let velocityX = 2; // Change to adjust speed
-let velocityY = 2; // Change to adjust speed
+let velocityX = 5; // Change to adjust speed
+let velocityY = 5; // Change to adjust speed
 
 // Game state variables
 let clickCount = 0;
@@ -25,6 +25,7 @@ let gameOver = false;
 let startTime = null;
 let elapsedTime = 0;
 let timerInterval = null;
+let animationFrameId = null; // Store the ID of the current animation frame
 
 // Initialize the dot's position
 function initializeDot() {
@@ -54,12 +55,27 @@ function moveDot() {
     dot.style.top = `${posY}px`;
 }
 
+// Fetch existing names from the backend
+async function fetchExistingNames() {
+    try {
+        const response = await fetch('http://localhost:8080/api/getResults');
+        const data = await response.json();
+        return Object.keys(data); // Assuming keys are player names
+    } catch (error) {
+        console.error('Error fetching existing names:', error);
+        return []; // Return an empty array on error
+    }
+}
+
 // Handle mouse click in game area
-function handleGameClick(mouseX, mouseY) {
+async function handleGameClick(mouseX, mouseY) {
     clickCount++;
 
     // Check if the click is inside the dot
     const isHit = mouseX >= posX && mouseX <= posX + DOT_SIZE && mouseY >= posY && mouseY <= posY + DOT_SIZE;
+
+    // Declare existingNames outside the do...while loop
+    let existingNames;
 
     if (isHit) {
         // Successfully clicked the dot
@@ -67,11 +83,21 @@ function handleGameClick(mouseX, mouseY) {
         gameOver = true; // End the game
         stopTimer(); // Stop the timer
 
-        // Prompt for user name and add result
-        const playerName = prompt("You won! Enter your name:");
-        const finalTime = (elapsedTime / 1000).toFixed(2);
-        addResultToBackend(playerName, finalTime);
-        showResultsModal();
+        // Prompt for user name and check for duplicates
+        let playerName;
+        do {
+            playerName = prompt("You won! Enter your name:");
+            existingNames = await fetchExistingNames(); // Fetch existing names
+            if (existingNames.includes(playerName)) {
+                alert("Name already taken, please enter a new name.");
+            }
+        } while (existingNames.includes(playerName) && playerName); // Repeat until a unique name is entered
+
+        if (playerName) {
+            const finalTime = (elapsedTime / 1000).toFixed(2);
+            await addResultToBackend(playerName, finalTime, clickCount); // Pass click count
+            showResultsModal();
+        }
 
     } else if (clickCount >= MAX_CLICKS) {
         // Reached maximum clicks without hitting the dot
@@ -79,10 +105,20 @@ function handleGameClick(mouseX, mouseY) {
         messageDisplay.textContent = "Too many clicks! Game Over.";
         stopTimer(); // Stop the timer
 
-        // Prompt for user name and add result with a '-' (failure) result
-        const playerName = prompt("Game Over! Enter your name:");
-        addResultToBackend(playerName, "-");
-        showResultsModal();
+        // Prompt for user name and check for duplicates
+        let playerName;
+        do {
+            playerName = prompt("Game Over! Enter your name:");
+            existingNames = await fetchExistingNames(); // Fetch existing names
+            if (existingNames.includes(playerName)) {
+                alert("Name already taken, please enter a new name.");
+            }
+        } while (existingNames.includes(playerName) && playerName); // Repeat until a unique name is entered
+
+        if (playerName) {
+            await addResultToBackend(playerName, "-", clickCount); // Pass click count
+            showResultsModal();
+        }
     }
 }
 
@@ -92,10 +128,11 @@ function showResultsModal() {
     fetchResults(); // Fetch and display results in the modal
 }
 
-// Close the results modal
+// Close the results modal and restart the game
 function closeResultsModal() {
     document.getElementById('resultsModal').style.display = 'none';
     resetGame(); // Reset game state for a new game
+    dot.style.display = "block"; // Ensure the dot is visible again
 }
 
 // Reset the game state
@@ -103,115 +140,111 @@ function resetGame() {
     gameOver = false;
     clickCount = 0;
     messageDisplay.textContent = ""; // Clear messages
+    stopGame(); // Stop the previous game animation before restarting
     initializeDot(); // Reinitialize dot
     startTimer(); // Restart timer
     animate(); // Start animation loop
 }
 
 // Function to submit the result to the backend
-function addResultToBackend(name, result) {
-    fetch('http://localhost:8080/api/submitResult?name=' + encodeURIComponent(name) + '&result=' + encodeURIComponent(result), {
+function addResultToBackend(name, result, clicks) {
+    fetch('http://localhost:8080/api/submitResult?name=' + encodeURIComponent(name) + '&result=' + encodeURIComponent(result) + '&clicks=' + encodeURIComponent(clicks), {
         method: 'POST',
     })
-    .then(response => response.text())
+    .then(response => {
+        if (!response.ok) {
+            throw new Error('Network response was not ok: ' + response.statusText);
+        }
+        return response.text();
+    })
     .then(data => {
         console.log('Response from server:', data);
+        fetchResults(); // Fetch results immediately after submitting
     })
     .catch(error => {
         console.error('Error submitting result:', error);
     });
 }
 
-// Fetch and display results
-function fetchResults() {
-    fetch('http://localhost:8080/api/getResults')
-        .then(response => response.json())
-        .then(data => {
-            console.log('Results from server:', data);
-            displayResults(data); // Display results in the modal
-        })
-        .catch(error => console.error('Error fetching results:', error));
-}
 
-// Display the results in the modal
-function displayResults(results) {
-    const resultsDisplay = document.getElementById('resultsDisplay');
-    resultsDisplay.innerHTML = ''; // Clear the display
+// Function to fetch results from the backend and display them
+async function fetchResults() {
+    try {
+        const response = await fetch('http://localhost:8080/api/getResults');
+        const data = await response.json();
+        const resultsDisplay = document.getElementById('resultsDisplay');
+        resultsDisplay.innerHTML = ""; // Clear previous results
 
-    // Sort results
-    const sortedResults = Object.entries(results).sort((a, b) => {
-        const aTime = a[1] === '-' ? Infinity : parseFloat(a[1]);
-        const bTime = b[1] === '-' ? Infinity : parseFloat(b[1]);
-        return aTime - bTime; // Sort by time, then by names
-    });
+        // Create a table to display results
+        const resultsTable = document.createElement('table');
+        resultsTable.className = 'resultsTable';
+        resultsTable.innerHTML = "<tr><th>Name</th><th>Result</th><th>Clicks</th></tr>"; // Table header
 
-    // Create table for results
-    const resultsTable = document.createElement('table');
-    resultsTable.className = 'resultsTable';
-    const headerRow = resultsTable.insertRow();
-    headerRow.innerHTML = '<th>Name</th><th>Time (s)</th>';
+        // Sort results by time, with losing results sorted to the end
+        const sortedResults = Object.entries(data).sort((a, b) => {
+            const aTime = a[1].result === '-' ? Infinity : parseFloat(a[1].result);
+            const bTime = b[1].result === '-' ? Infinity : parseFloat(b[1].result);
+            return aTime - bTime; // Sort by result time
+        });
 
-    sortedResults.forEach(([name, result]) => {
-        const row = resultsTable.insertRow();
-        row.innerHTML = `<td>${name}</td><td>${result}</td>`;
-        resultsTable.appendChild(row);
-    });
+        // Create rows for each result
+        sortedResults.forEach(([name, resultData]) => {
+            const result = resultData.result; // Get the result
+            const clicks = resultData.clicks; // Get the clicks
+            const row = document.createElement('tr');
+            row.innerHTML = `<td>${name}</td><td>${result}</td><td>${clicks}</td>`; // Display clicks
+            resultsTable.appendChild(row);
+        });
 
-    resultsDisplay.appendChild(resultsTable);
-}
-
-// Animation loop
-function animate() {
-    moveDot();
-    requestAnimationFrame(animate);
-}
-
-// Timer logic
-function startTimer() {
-    startTime = Date.now();  // Store the current time at the start
-
-    // Clear any existing interval
-    if (timerInterval) {
-        clearInterval(timerInterval);
-    }
-
-    // Start updating the timer display
-    timerInterval = setInterval(() => {
-        elapsedTime = Date.now() - startTime;  // Calculate the elapsed time
-        updateTimerDisplay(elapsedTime);  // Update the display
-    }, 16); // Roughly 60 frames per second (16ms per frame)
-}
-
-// Function to update the timer display on the screen
-function updateTimerDisplay(elapsedTime) {
-    if (timerDisplay) {
-        // Convert elapsedTime to seconds and display with 2 decimal places
-        timerDisplay.textContent = (elapsedTime / 1000).toFixed(2) + ' s';
+        resultsDisplay.appendChild(resultsTable); // Append the results table
+    } catch (error) {
+        console.error('Error fetching results:', error);
     }
 }
 
-// Stop the timer
-function stopTimer() {
-    clearInterval(timerInterval); // Stop the timer
+
+// Stop the game (cancel animation and hide dot)
+function stopGame() {
+    cancelAnimationFrame(animationFrameId); // Stop the animation loop
+    dot.style.display = "none"; // Hide the dot
 }
 
 // Start the game
 function startGame() {
-    startTimer(); // Start the timer when the game starts
-    initializeDot();
-    animate();
+    resetGame(); // Reset the game state
+
+    dot.style.display = "block"; // Show the dot
+    animate(); // Start the animation loop
 }
 
-// Add event listener for clicks in the game area
+// Start the timer
+function startTimer() {
+    startTime = performance.now(); // Get the current time
+    timerInterval = setInterval(() => {
+        elapsedTime = performance.now() - startTime; // Calculate elapsed time
+        timerDisplay.textContent = `${(elapsedTime / 1000).toFixed(2)} s`; // Update timer display
+    }, TIMER_INTERVAL);
+}
+
+// Stop the timer
+function stopTimer() {
+    clearInterval(timerInterval);
+    timerInterval = null;
+}
+
+// Animation loop for moving the dot
+function animate() {
+    moveDot(); // Move the dot
+    animationFrameId = requestAnimationFrame(animate); // Request the next frame
+}
+
+// Event listener for clicks in the game area
 gameArea.addEventListener('click', (event) => {
-    if (gameOver) return; // Ignore clicks if the game is over
-    const rect = gameArea.getBoundingClientRect();
-    const mouseX = Math.floor(event.clientX - rect.left);
-    const mouseY = Math.floor(event.clientY - rect.top);
-    handleGameClick(mouseX, mouseY);
+    const rect = gameArea.getBoundingClientRect(); // Get the bounding rect of the game area
+    const mouseX = event.clientX - rect.left; // Calculate mouse X relative to game area
+    const mouseY = event.clientY - rect.top; // Calculate mouse Y relative to game area
+    handleGameClick(mouseX, mouseY); // Handle the click
 });
 
-// Start the game on page load
-window.onload = function() {
-    startGame();  // Call startGame when the window loads
-};
+// Start the game when the script loads
+startGame();

@@ -8,15 +8,35 @@ import java.util.Map;
 @Service
 public class ResultService {
 
-    private Map<String, String> resultMap = new HashMap<>();
+    // HashMap to store results in-memory
+    private final Map<String, Result> results = new HashMap<>();
 
-    public void addResult(String name, String result) {
-        System.out.println("Adding result: " + name + " - " + result); // Log for verification
-        resultMap.put(name, result);
+    // Class to represent a result with clicks
+    public static class Result {
+        private String result;
+        private int clicks;
+
+        public Result(String result, int clicks) {
+            this.result = result;
+            this.clicks = clicks;
+        }
+
+        public String getResult() {
+            return result;
+        }
+
+        public int getClicks() {
+            return clicks;
+        }
     }
 
-    // New method to retrieve the entire HashMap
-    public Map<String, String> getAllResults() {
-        return resultMap;
+    // Method to add a result
+    public void addResult(String name, String result, int clicks) {
+        results.put(name, new Result(result, clicks)); // Store the result and clicks
+    }
+
+    // Method to retrieve all results
+    public Map<String, Result> getAllResults() {
+        return results; // Return the current results
     }
 }

@@ -49,18 +49,26 @@ public class DotController {
 
     // Endpoint to add result when the game ends (either win or lose)
     @PostMapping("/submitResult")
-    public ResponseEntity<String> submitResult(@RequestParam String name, @RequestParam String result) {
-        System.out.println("Submitting result: " + name + " - " + result); // Log for verification
-        resultService.addResult(name, result);
+    public ResponseEntity<String> submitResult(@RequestParam String name, @RequestParam String result, @RequestParam int clicks) {
+        System.out.println("Submitting result: " + name + " - " + result + " - Clicks: " + clicks); // Log for verification
+        resultService.addResult(name, result, clicks); // Update to save clicks
         return ResponseEntity.ok("Result submitted successfully");
     }
 
+
     // Endpoint to retrieve all results
     @GetMapping("/getResults")
-    public Map<String, String> getResults() {
-        Map<String, String> results = resultService.getAllResults();
-        return results;
+    public Map<String, Map<String, Object>> getResults() {
+        Map<String, Map<String, Object>> resultsResponse = new HashMap<>();
+        for (Map.Entry<String, ResultService.Result> entry : resultService.getAllResults().entrySet()) {
+            Map<String, Object> resultDetails = new HashMap<>();
+            resultDetails.put("result", entry.getValue().getResult());
+            resultDetails.put("clicks", entry.getValue().getClicks());
+            resultsResponse.put(entry.getKey(), resultDetails); // Add both result and clicks
+        }
+        return resultsResponse;
     }
+
 
     // Scheduled task to clear results every 24 hours (86400000 ms = 24 hours)
     @Scheduled(fixedRate = 86400000) // Runs every 24 hours

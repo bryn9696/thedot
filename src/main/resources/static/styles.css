@@ -61,3 +61,20 @@
 .resultsTable tr:hover {
     background-color: #ddd;
 }
+
+.orbitron-title {
+    font-family: "Orbitron", sans-serif;
+    font-weight: 900; /* You can adjust weight here */
+    font-optical-sizing: auto;
+    font-size: 36px;
+    text-align: center;
+}
+
+.orbitron-timer {
+    font-family: "Orbitron", sans-serif;
+    font-weight: 700; /* Set weight for timer */
+    font-optical-sizing: auto;
+    font-size: 24px;
+    text-align: center;
+    margin-top: 10px;
+}

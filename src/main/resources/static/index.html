@@ -61,7 +61,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dot Game</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400..900&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="styles.css"> <!-- Corrected CSS link -->
     <style>
+        /* Your existing CSS styles here */
         body {
             text-align: center; /* Center align all text */
         }
@@ -123,15 +128,32 @@
         h1 {
             margin-bottom: 20px; /* Add some spacing below the title */
         }
+
+        /* Add Orbitron font styles */
+        .orbitron-title {
+            font-family: "Orbitron", sans-serif;
+            font-weight: 900; /* You can adjust weight here */
+            font-optical-sizing: auto;
+            font-size: 36px;
+            text-align: center;
+        }
+
+        .orbitron-timer {
+            font-family: "Orbitron", sans-serif;
+            font-weight: 700; /* Set weight for timer */
+            font-optical-sizing: auto;
+            font-size: 24px;
+            text-align: center;
+            margin-top: 10px;
+        }
     </style>
 </head>
 <body>
-<h1>The Dot</h1> <!-- Title -->
+<h1 class="orbitron-title">the dot</h1>
 <div id="gameArea"></div>
-<div id="timerDisplay"></div> <!-- Timer display centered under the game area -->
+<div id="timerDisplay" class="orbitron-timer">0.00 s</div>
 <div id="messageDisplay"></div>
 
-<!-- Modal -->
 <div id="resultsModal">
     <div class="modal-content">
         <span class="close" onclick="closeResultsModal()">&times;</span>
@@ -140,6 +162,6 @@
     </div>
 </div>
 
-<script src="/js/script.js" defer></script>-->
+<script src="js/script.js" defer></script>
 </body>
 </html>
