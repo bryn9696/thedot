@@ -13,8 +13,8 @@ const timerDisplay = document.getElementById('timerDisplay'); // Timer element
 // Dot movement variables
 let posX = Math.random() * (gameArea.clientWidth - DOT_SIZE);
 let posY = Math.random() * (gameArea.clientHeight - DOT_SIZE);
-let velocityX = 5; // Change to adjust speed
-let velocityY = 5; // Change to adjust speed
+let velocityX = 4; // Change to adjust speed
+let velocityY = 4; // Change to adjust speed
 
 // Game state variables
 let clickCount = 0;
