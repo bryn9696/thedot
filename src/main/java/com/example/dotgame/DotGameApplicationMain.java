@@ -7,9 +7,9 @@ import org.springframework.scheduling.annotation.EnableScheduling;
 
 @SpringBootApplication(exclude = {DataSourceAutoConfiguration.class})
 @EnableScheduling // Enable scheduling to run the 24-hour reset task
-public class DotGameApplication {
+public class DotGameApplicationMain {
 
     public static void main(String[] args) {
-        SpringApplication.run(DotGameApplication.class, args);
+        SpringApplication.run(DotGameApplicationMain.class, args);
     }
 }
