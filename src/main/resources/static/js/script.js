@@ -273,7 +273,7 @@ document.getElementById('shareTwitter').addEventListener('click', function() {
 });
 
 document.getElementById('shareFacebook').addEventListener('click', function() {
-    const url = `https://www.facebook.com/sharer/sharer.php?u=yourgameurl.com&quote=I completed the 🔴 game in ${finalTime} seconds and ${finalClicks} clicks! \nCan you beat my score? 🔴;
+    const url = `https://www.facebook.com/sharer/sharer.php?u=yourgameurl.com&quote=I completed the 🔴 game in ${finalTime} seconds and ${finalClicks} clicks! \nCan you beat my score? 🔴`;
     window.open(url, '_blank');
 });
 

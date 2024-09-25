@@ -125,6 +125,19 @@ body, html {
     margin: auto;
 }
 
-button {
-    margin: 5px;
+/* Share button styles */
+/* Share button styles */
+.share-button {
+    background-color: grey; /* Set background color to grey */
+    color: white;           /* Text color */
+    border: none;          /* Remove border */
+    padding: 3px 6px;      /* Smaller padding for a smaller button */
+    font-size: 10px;       /* Smaller font size */
+    cursor: pointer;        /* Pointer cursor on hover */
+    border-radius: 3px;    /* Slightly rounded corners */
+    margin: 2px;           /* Add margin for spacing between buttons */
+}
+
+.share-button:hover {
+    background-color: darkgrey; /* Darker grey on hover */
 }
