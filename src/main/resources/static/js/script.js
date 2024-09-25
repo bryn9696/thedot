@@ -108,7 +108,7 @@ async function handleGameInteraction(x, y) {
 // Fetch existing names from the backend
 async function fetchExistingNames() {
     try {
-        const response = await fetch('https://the-dot-b82bb75a3fcb.herokuapp.com/api/getResults');
+        const response = await fetch('https://the-dot-game-704ea16c8f86.herokuapp.com/api/getResults');
         const data = await response.json();
         return Object.keys(data);
     } catch (error) {
@@ -119,7 +119,7 @@ async function fetchExistingNames() {
 
 // Function to submit the result to the backend
 function addResultToBackend(name, result, clicks) {
-    fetch('https://the-dot-b82bb75a3fcb.herokuapp.com/api/submitResult?name=' + encodeURIComponent(name) + '&result=' + encodeURIComponent(result) + '&clicks=' + encodeURIComponent(clicks), {
+    fetch('https://the-dot-game-704ea16c8f86.herokuapp.com/api/submitResult?name=' + encodeURIComponent(name) + '&result=' + encodeURIComponent(result) + '&clicks=' + encodeURIComponent(clicks), {
         method: 'POST',
     })
     .then(response => {
@@ -140,7 +140,7 @@ function addResultToBackend(name, result, clicks) {
 // Function to fetch results from the backend and display them
 async function fetchResults() {
     try {
-        const response = await fetch('https://the-dot-b82bb75a3fcb.herokuapp.com/api/getResults');
+        const response = await fetch('https://the-dot-game-704ea16c8f86.herokuapp.com/api/getResults');
         const data = await response.json();
         const resultsDisplay = document.getElementById('resultsDisplay');
         resultsDisplay.innerHTML = ""; // Clear previous results
