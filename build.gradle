@@ -29,7 +29,7 @@ tasks.named('test') {
 
 tasks.named('bootJar') {
     enabled = true
-    mainClass.set('com.example.dotgame.DotGameApplication') // Update with your actual main class
+    mainClass.set('com.example.dotgame.DotGameApplication') // Specify your main class here
 }
 
 jar {
@@ -39,3 +39,4 @@ jar {
         )
     }
 }
+
