@@ -29,8 +29,10 @@ let animationFrameId = null; // Store the ID of the current animation frame
 
 // Initialize the dot's position
 function initializeDot() {
-    posX = Math.random() * (gameArea.clientWidth - DOT_SIZE);
-    posY = Math.random() * (gameArea.clientHeight - DOT_SIZE);
+    const gameAreaWidth = gameArea.clientWidth - DOT_SIZE;
+    const gameAreaHeight = gameArea.clientHeight - DOT_SIZE;
+    posX = Math.random() * gameAreaWidth;
+    posY = Math.random() * gameAreaHeight;
     dot.style.left = `${posX}px`;
     dot.style.top = `${posY}px`;
 }
@@ -55,35 +57,17 @@ function moveDot() {
     dot.style.top = `${posY}px`;
 }
 
-// Fetch existing names from the backend
-async function fetchExistingNames() {
-    try {
-        const response = await fetch('https://the-dot-b82bb75a3fcb.herokuapp.com/api/getResults');
-        const data = await response.json();
-        return Object.keys(data); // Assuming keys are player names
-    } catch (error) {
-        console.error('Error fetching existing names:', error);
-        return []; // Return an empty array on error
-    }
-}
-
-// Handle mouse click in game area
-async function handleGameClick(mouseX, mouseY) {
+// Handle interaction (clicks or touches) in the game area
+async function handleGameInteraction(x, y) {
     clickCount++;
 
-    // Check if the click is inside the dot
-    const isHit = mouseX >= posX && mouseX <= posX + DOT_SIZE && mouseY >= posY && mouseY <= posY + DOT_SIZE;
-
-    // Declare existingNames outside the do...while loop
-    let existingNames;
+    // Check if the click/touch is inside the dot
+    const isHit = x >= posX && x <= posX + DOT_SIZE && y >= posY && y <= posY + DOT_SIZE;
 
     if (isHit) {
-        // Successfully clicked the dot
         messageDisplay.textContent = "You win!";
         gameOver = true; // End the game
         stopTimer(); // Stop the timer
-
-        // Prompt for user name and check for duplicates
         let playerName;
         do {
             playerName = prompt("You won! Enter your name:");
@@ -91,11 +75,11 @@ async function handleGameClick(mouseX, mouseY) {
             if (existingNames.includes(playerName)) {
                 alert("Name already taken, please enter a new name.");
             }
-        } while (existingNames.includes(playerName) && playerName); // Repeat until a unique name is entered
+        } while (existingNames.includes(playerName) && playerName);
 
         if (playerName) {
             const finalTime = (elapsedTime / 1000).toFixed(2);
-            await addResultToBackend(playerName, finalTime, clickCount); // Pass click count
+            await addResultToBackend(playerName, finalTime, clickCount);
             showResultsModal();
         }
 
@@ -105,45 +89,32 @@ async function handleGameClick(mouseX, mouseY) {
         messageDisplay.textContent = "Too many clicks! Game Over.";
         stopTimer(); // Stop the timer
 
-        // Prompt for user name and check for duplicates
         let playerName;
         do {
             playerName = prompt("Game Over! Enter your name:");
-            existingNames = await fetchExistingNames(); // Fetch existing names
+            existingNames = await fetchExistingNames();
             if (existingNames.includes(playerName)) {
                 alert("Name already taken, please enter a new name.");
             }
-        } while (existingNames.includes(playerName) && playerName); // Repeat until a unique name is entered
+        } while (existingNames.includes(playerName) && playerName);
 
         if (playerName) {
-            await addResultToBackend(playerName, "-", clickCount); // Pass click count
+            await addResultToBackend(playerName, "-", clickCount);
             showResultsModal();
         }
     }
 }
 
-// Show the results modal
-function showResultsModal() {
-    document.getElementById('resultsModal').style.display = 'block';
-    fetchResults(); // Fetch and display results in the modal
-}
-
-// Close the results modal and restart the game
-function closeResultsModal() {
-    document.getElementById('resultsModal').style.display = 'none';
-    resetGame(); // Reset game state for a new game
-    dot.style.display = "block"; // Ensure the dot is visible again
-}
-
-// Reset the game state
-function resetGame() {
-    gameOver = false;
-    clickCount = 0;
-    messageDisplay.textContent = ""; // Clear messages
-    stopGame(); // Stop the previous game animation before restarting
-    initializeDot(); // Reinitialize dot
-    startTimer(); // Restart timer
-    animate(); // Start animation loop
+// Fetch existing names from the backend
+async function fetchExistingNames() {
+    try {
+        const response = await fetch('https://the-dot-b82bb75a3fcb.herokuapp.com/api/getResults');
+        const data = await response.json();
+        return Object.keys(data);
+    } catch (error) {
+        console.error('Error fetching existing names:', error);
+        return [];
+    }
 }
 
 // Function to submit the result to the backend
@@ -159,13 +130,12 @@ function addResultToBackend(name, result, clicks) {
     })
     .then(data => {
         console.log('Response from server:', data);
-        fetchResults(); // Fetch results immediately after submitting
+        fetchResults();
     })
     .catch(error => {
         console.error('Error submitting result:', error);
     });
 }
-
 
 // Function to fetch results from the backend and display them
 async function fetchResults() {
@@ -175,54 +145,73 @@ async function fetchResults() {
         const resultsDisplay = document.getElementById('resultsDisplay');
         resultsDisplay.innerHTML = ""; // Clear previous results
 
-        // Create a table to display results
         const resultsTable = document.createElement('table');
         resultsTable.className = 'resultsTable';
         resultsTable.innerHTML = "<tr><th>Name</th><th>Result</th><th>Clicks</th></tr>"; // Table header
 
-        // Sort results by time, with losing results sorted to the end
         const sortedResults = Object.entries(data).sort((a, b) => {
             const aTime = a[1].result === '-' ? Infinity : parseFloat(a[1].result);
             const bTime = b[1].result === '-' ? Infinity : parseFloat(b[1].result);
-            return aTime - bTime; // Sort by result time
+            return aTime - bTime;
         });
 
-        // Create rows for each result
         sortedResults.forEach(([name, resultData]) => {
-            const result = resultData.result; // Get the result
-            const clicks = resultData.clicks; // Get the clicks
+            const result = resultData.result;
+            const clicks = resultData.clicks;
             const row = document.createElement('tr');
-            row.innerHTML = `<td>${name}</td><td>${result}</td><td>${clicks}</td>`; // Display clicks
+            row.innerHTML = `<td>${name}</td><td>${result}</td><td>${clicks}</td>`;
             resultsTable.appendChild(row);
         });
 
-        resultsDisplay.appendChild(resultsTable); // Append the results table
+        resultsDisplay.appendChild(resultsTable);
     } catch (error) {
         console.error('Error fetching results:', error);
     }
 }
 
+// Show the results modal
+function showResultsModal() {
+    document.getElementById('resultsModal').style.display = 'block';
+    fetchResults();
+}
+
+// Close the results modal and restart the game
+function closeResultsModal() {
+    document.getElementById('resultsModal').style.display = 'none';
+    resetGame();
+    dot.style.display = "block"; // Ensure the dot is visible again
+}
+
+// Reset the game state
+function resetGame() {
+    gameOver = false;
+    clickCount = 0;
+    messageDisplay.textContent = "";
+    stopGame();
+    initializeDot();
+    startTimer();
+    animate();
+}
 
 // Stop the game (cancel animation and hide dot)
 function stopGame() {
-    cancelAnimationFrame(animationFrameId); // Stop the animation loop
-    dot.style.display = "none"; // Hide the dot
+    cancelAnimationFrame(animationFrameId);
+    dot.style.display = "none";
 }
 
 // Start the game
 function startGame() {
-    resetGame(); // Reset the game state
-
-    dot.style.display = "block"; // Show the dot
-    animate(); // Start the animation loop
+    resetGame();
+    dot.style.display = "block";
+    animate();
 }
 
 // Start the timer
 function startTimer() {
-    startTime = performance.now(); // Get the current time
+    startTime = performance.now();
     timerInterval = setInterval(() => {
-        elapsedTime = performance.now() - startTime; // Calculate elapsed time
-        timerDisplay.textContent = `${(elapsedTime / 1000).toFixed(2)} s`; // Update timer display
+        elapsedTime = performance.now() - startTime;
+        timerDisplay.textContent = `${(elapsedTime / 1000).toFixed(2)} s`;
     }, TIMER_INTERVAL);
 }
 
@@ -234,16 +223,25 @@ function stopTimer() {
 
 // Animation loop for moving the dot
 function animate() {
-    moveDot(); // Move the dot
-    animationFrameId = requestAnimationFrame(animate); // Request the next frame
+    moveDot();
+    animationFrameId = requestAnimationFrame(animate);
 }
 
-// Event listener for clicks in the game area
+// Event listener for mouse clicks
 gameArea.addEventListener('click', (event) => {
-    const rect = gameArea.getBoundingClientRect(); // Get the bounding rect of the game area
-    const mouseX = event.clientX - rect.left; // Calculate mouse X relative to game area
-    const mouseY = event.clientY - rect.top; // Calculate mouse Y relative to game area
-    handleGameClick(mouseX, mouseY); // Handle the click
+    const rect = gameArea.getBoundingClientRect();
+    const mouseX = event.clientX - rect.left;
+    const mouseY = event.clientY - rect.top;
+    handleGameInteraction(mouseX, mouseY);
+});
+
+// Event listener for touch events
+gameArea.addEventListener('touchstart', (event) => {
+    const rect = gameArea.getBoundingClientRect();
+    const touch = event.touches[0];
+    const touchX = touch.clientX - rect.left;
+    const touchY = touch.clientY - rect.top;
+    handleGameInteraction(touchX, touchY);
 });
 
 // Start the game when the script loads

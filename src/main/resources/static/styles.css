@@ -1,42 +1,82 @@
+/* General Styles */
+body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center everything vertically */
+    align-items: center; /* Center everything horizontally */
+    font-family: Arial, sans-serif;
+    background-color: #f0f0f0;
+}
+
+/* Game Area Styling */
+#gameArea {
+    position: relative;
+    width: 90vw; /* Use viewport width */
+    height: 80vh; /* Use viewport height */
+    max-height: 80vh; /* Limit maximum height */
+    max-width: 90vw; /* Limit maximum width */
+    aspect-ratio: 16 / 9; /* Maintain a 16:9 aspect ratio */
+    background-color: #fafafa;
+    border: 2px solid #ccc;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    overflow: hidden;
+}
+
+/* Dot Styling */
+.dot {
+    position: absolute;
+    width: 50px;
+    height: 50px;
+    background-color: red;
+    border-radius: 50%;
+    box-shadow: 0px 4px 8px rgba(0, 0, 0, 0.2);
+    cursor: pointer;
+}
+
+/* Title at the top */
+#messageDisplay {
+    font-size: 1.5rem;
+    color: #333;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+/* Timer at the bottom */
+#timerDisplay {
+    font-size: 1.2rem;
+    color: #555;
+    margin-top: 10px;
+    text-align: center;
+}
+
 /* Modal Styles */
-.modal {
-    display: none; /* Hidden by default */
-    position: fixed; /* Stay in place */
-    z-index: 1000; /* Sit on top */
+#resultsModal {
+    display: none;
+    position: fixed;
+    z-index: 1000;
     left: 0;
     top: 0;
-    width: 100%; /* Full width */
-    height: 100%; /* Full height */
-    overflow: auto; /* Enable scroll if needed */
-    background-color: rgba(0, 0, 0, 0.8); /* Black w/ opacity */
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 /* Modal Content */
 .modal-content {
-    background-color: #fefefe;
-    margin: 15% auto; /* 15% from the top and centered */
+    background-color: #fff;
     padding: 20px;
-    border: 1px solid #888;
-    width: 80%; /* Could be more or less, depending on screen size */
-    max-width: 600px; /* Limit width */
+    border-radius: 4px;
+    width: 80%; /* Responsive width */
+    max-width: 600px; /* Max width for larger screens */
 }
 
-/* Close Button */
-.close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-}
-
-.close:hover,
-.close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-}
-
-/* Table Styles */
+/* Results Table Styles */
 .resultsTable {
     width: 100%;
     border-collapse: collapse;
@@ -64,16 +104,14 @@
 
 .orbitron-title {
     font-family: "Orbitron", sans-serif;
-    font-weight: 900; /* You can adjust weight here */
-    font-optical-sizing: auto;
+    font-weight: 900;
     font-size: 36px;
     text-align: center;
 }
 
 .orbitron-timer {
     font-family: "Orbitron", sans-serif;
-    font-weight: 700; /* Set weight for timer */
-    font-optical-sizing: auto;
+    font-weight: 700;
     font-size: 24px;
     text-align: center;
     margin-top: 10px;
