@@ -29,14 +29,15 @@ tasks.named('test') {
 
 // Ensure the executable JAR is built correctly for Spring Boot
 tasks.named('bootJar') {
-    mainClass.set('com.example.dotgame.DotGameApplication') // Update with your actual main class
+    mainClass.set('com.example.dotgame.DotGameApplication') // Ensure this matches your actual main class
 }
 
-// Add a jar task to ensure the plain JAR is built with a manifest including the Main-Class attribute
+// Optionally, configure a task for a plain JAR with a Main-Class attribute in the manifest
 jar {
     manifest {
         attributes(
-                'Main-Class': 'com.example.dotgame.DotGameApplication' // Ensure this matches your main class
+                'Main-Class': 'com.example.dotgame.DotGameApplication' // Ensure this matches your actual main class
         )
     }
 }
+
