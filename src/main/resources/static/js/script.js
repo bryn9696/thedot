@@ -27,6 +27,15 @@ let elapsedTime = 0;
 let timerInterval = null;
 let animationFrameId = null; // Store the ID of the current animation frame
 
+// Share Result Variables
+let finalTime = 0;
+let finalClicks = 0;
+
+// Detect environment (development or production)
+const API_BASE_URL = window.location.hostname === 'localhost'
+  ? 'http://localhost:8080'  // Local development
+  : 'https://the-dot-game-704ea16c8f86.herokuapp.com';
+
 // Initialize the dot's position
 function initializeDot() {
     const gameAreaWidth = gameArea.clientWidth - DOT_SIZE;
@@ -108,7 +117,7 @@ async function handleGameInteraction(x, y) {
 // Fetch existing names from the backend
 async function fetchExistingNames() {
     try {
-        const response = await fetch('https://the-dot-game-704ea16c8f86.herokuapp.com/api/getResults');
+        const response = await fetch(`${API_BASE_URL}/api/getResults`);
         const data = await response.json();
         return Object.keys(data);
     } catch (error) {
@@ -119,7 +128,7 @@ async function fetchExistingNames() {
 
 // Function to submit the result to the backend
 function addResultToBackend(name, result, clicks) {
-    fetch('https://the-dot-game-704ea16c8f86.herokuapp.com/api/submitResult?name=' + encodeURIComponent(name) + '&result=' + encodeURIComponent(result) + '&clicks=' + encodeURIComponent(clicks), {
+    fetch(`${API_BASE_URL}/api/submitResult?name=` + encodeURIComponent(name) + '&result=' + encodeURIComponent(result) + '&clicks=' + encodeURIComponent(clicks), {
         method: 'POST',
     })
     .then(response => {
@@ -140,7 +149,7 @@ function addResultToBackend(name, result, clicks) {
 // Function to fetch results from the backend and display them
 async function fetchResults() {
     try {
-        const response = await fetch('https://the-dot-game-704ea16c8f86.herokuapp.com/api/getResults');
+        const response = await fetch(`${API_BASE_URL}/api/getResults`);
         const data = await response.json();
         const resultsDisplay = document.getElementById('resultsDisplay');
         resultsDisplay.innerHTML = ""; // Clear previous results
@@ -242,6 +251,39 @@ gameArea.addEventListener('touchstart', (event) => {
     const touchX = touch.clientX - rect.left;
     const touchY = touch.clientY - rect.top;
     handleGameInteraction(touchX, touchY);
+});
+
+// Assuming this function is called when the game is over and results are ready
+function displayFinalResults(time, clicks) {
+    finalTime = time;
+    finalClicks = clicks;
+
+    // Update the modal with the results
+    document.getElementById('finalTime').textContent = finalTime;
+    document.getElementById('finalClicks').textContent = finalClicks;
+
+    // Show the results modal (you might already have this in place)
+    document.getElementById('resultsModal').style.display = 'block';
+}
+
+// Event listeners for sharing options
+document.getElementById('shareTwitter').addEventListener('click', function() {
+    const url = `https://twitter.com/intent/tweet?text=I completed the 🔴 game in ${finalTime} seconds and ${finalClicks} clicks! \nCan you beat my score? 🔴`;
+    window.open(url, '_blank');
+});
+
+document.getElementById('shareFacebook').addEventListener('click', function() {
+    const url = `https://www.facebook.com/sharer/sharer.php?u=yourgameurl.com&quote=I completed the 🔴 game in ${finalTime} seconds and ${finalClicks} clicks! \nCan you beat my score? 🔴;
+    window.open(url, '_blank');
+});
+
+document.getElementById('copyToClipboard').addEventListener('click', function() {
+    const textToCopy = `I completed the 🔴 game in ${finalTime} seconds and ${finalClicks} clicks! \nCan you beat my score? 🔴`;
+    navigator.clipboard.writeText(textToCopy).then(function() {
+        alert('Result copied to clipboard!');
+    }, function(err) {
+        console.error('Failed to copy text: ', err);
+    });
 });
 
 // Start the game when the script loads

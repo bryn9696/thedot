@@ -116,3 +116,15 @@ body, html {
     text-align: center;
     margin-top: 10px;
 }
+
+.modal-content {
+    text-align: center;
+    padding: 20px;
+    border-radius: 10px;
+    max-width: 500px;
+    margin: auto;
+}
+
+button {
+    margin: 5px;
+}
