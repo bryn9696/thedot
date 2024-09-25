@@ -27,6 +27,16 @@ tasks.named('test') {
     useJUnitPlatform()
 }
 
+// Ensure the executable JAR is built correctly for Spring Boot
 tasks.named('bootJar') {
-    mainClass.set('com.example.recipes_BE.RecipeSiteMain')
+    mainClass.set('com.example.dotgame.DotGameApplication') // Update with your actual main class
+}
+
+// Add a jar task to ensure the plain JAR is built with a manifest including the Main-Class attribute
+jar {
+    manifest {
+        attributes(
+                'Main-Class': 'com.example.dotgame.DotGameApplication' // Ensure this matches your main class
+        )
+    }
 }
