@@ -34,7 +34,7 @@ let finalClicks = 0;
 // Detect environment (development or production)
 const API_BASE_URL = window.location.hostname === 'localhost'
   ? 'http://localhost:8080'  // Local development
-  : 'https://the-dot-game-704ea16c8f86.herokuapp.com';
+  : 'https://the-dot-game-ab1b89814a75.herokuapp.com';
 
 // Initialize the dot's position
 function initializeDot() {
