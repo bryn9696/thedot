@@ -8,7 +8,16 @@ body, html {
     justify-content: center; /* Center everything vertically */
     align-items: center; /* Center everything horizontally */
     font-family: Arial, sans-serif;
-    background-color: #f0f0f0;
+    background-color: #ffffff;
+    box-sizing: border-box;
+}
+
+body {
+    display: flex;
+    flex-direction: column;
+    justify-content: center; /* Center content vertically */
+    min-height: 100vh; /* Ensure the body takes at least 100% of the viewport height */
+    background-color: #ffffff;
 }
 
 /* Game Area Styling */
