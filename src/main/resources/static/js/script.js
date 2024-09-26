@@ -128,23 +128,22 @@ async function fetchExistingNames() {
 }
 
 // Function to submit the result to the backend
-function addResultToBackend(name, result, clicks) {
-    fetch(`${API_BASE_URL}/api/submitResult?name=` + encodeURIComponent(name) + '&result=' + encodeURIComponent(result) + '&clicks=' + encodeURIComponent(clicks), {
-        method: 'POST',
-    })
-    .then(response => {
+async function addResultToBackend(name, result, clicks) {
+    try {
+        const response = await fetch(`${API_BASE_URL}/api/submitResult?name=${encodeURIComponent(name)}&result=${encodeURIComponent(result)}&clicks=${encodeURIComponent(clicks)}`, {
+            method: 'POST',
+        });
+
         if (!response.ok) {
             throw new Error('Network response was not ok: ' + response.statusText);
         }
-        return response.text();
-    })
-    .then(data => {
+
+        const data = await response.text();
         console.log('Response from server:', data);
-        fetchResults();
-    })
-    .catch(error => {
+        await fetchResults(); // Fetch updated results after submission
+    } catch (error) {
         console.error('Error submitting result:', error);
-    });
+    }
 }
 
 // Function to fetch results from the backend and display them
@@ -260,7 +259,7 @@ gameArea.addEventListener('touchstart', (event) => {
 function updateShareButtons(time, clicks) {
     const shareTwitter = document.getElementById('shareTwitter');
     const shareFacebook = document.getElementById('shareFacebook');
-    const shareClipboard = document.getElementById('copyToClipboard'); // Define here
+    const shareClipboard = document.getElementById('copyToClipboard');
     const resultsDisplay = document.getElementById('resultsDisplay'); // Get the results display element
 
     const gameUrl = 'https://tinyurl.com/5n96d8bh';
@@ -286,7 +285,6 @@ function updateShareButtons(time, clicks) {
         });
     };
 }
-
 
 // Start the game when the script loads
 startGame();
