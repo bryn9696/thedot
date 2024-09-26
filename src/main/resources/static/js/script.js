@@ -87,8 +87,9 @@ async function handleGameInteraction(x, y) {
         } while (existingNames.includes(playerName) && playerName);
 
         if (playerName) {
-            const finalTime = (elapsedTime / 1000).toFixed(2);
-            await addResultToBackend(playerName, finalTime, clickCount);
+            finalTime = (elapsedTime / 1000).toFixed(2);
+            finalClicks = clickCount; // Update final clicks
+            await addResultToBackend(playerName, finalTime, finalClicks);
             showResultsModal();
         }
 
@@ -182,6 +183,8 @@ async function fetchResults() {
 function showResultsModal() {
     document.getElementById('resultsModal').style.display = 'block';
     fetchResults();
+
+    updateShareButtons(finalTime, finalClicks); // Update share buttons with final results
 }
 
 // Close the results modal and restart the game
@@ -253,38 +256,37 @@ gameArea.addEventListener('touchstart', (event) => {
     handleGameInteraction(touchX, touchY);
 });
 
-// Assuming this function is called when the game is over and results are ready
-function displayFinalResults(time, clicks) {
-    finalTime = time;
-    finalClicks = clicks;
+// Update the share buttons with the final results
+function updateShareButtons(time, clicks) {
+    const shareTwitter = document.getElementById('shareTwitter');
+    const shareFacebook = document.getElementById('shareFacebook');
+    const shareClipboard = document.getElementById('copyToClipboard'); // Define here
+    const resultsDisplay = document.getElementById('resultsDisplay'); // Get the results display element
 
-    // Update the modal with the results
-    document.getElementById('finalTime').textContent = finalTime;
-    document.getElementById('finalClicks').textContent = finalClicks;
+    const gameUrl = 'https://tinyurl.com/5n96d8bh';
+    const message = `I completed the Dot Game in ${time} seconds and ${clicks} clicks! Can you beat my score? 🔴 Play here: ${gameUrl} `;
+    resultsDisplay.innerHTML = message; // Assuming resultsDisplay is where you show the message
 
-    // Show the results modal (you might already have this in place)
-    document.getElementById('resultsModal').style.display = 'block';
+    shareTwitter.onclick = () => {
+        const twitterUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(message)}`;
+        window.open(twitterUrl, '_blank');
+    };
+
+    shareFacebook.onclick = () => {
+        const facebookUrl = `https://www.facebook.com/sharer/sharer.php?u=https://the-dot-game-ab1b89814a75.herokuapp.com&quote=${encodeURIComponent(message)}`;
+        window.open(facebookUrl, '_blank');
+    };
+
+    // Copy to clipboard logic
+    shareClipboard.onclick = () => {
+        navigator.clipboard.writeText(message).then(() => {
+            alert("Results copied to clipboard!");
+        }).catch(err => {
+            console.error('Failed to copy text: ', err);
+        });
+    };
 }
 
-// Event listeners for sharing options
-document.getElementById('shareTwitter').addEventListener('click', function() {
-    const url = `https://twitter.com/intent/tweet?text=I completed the 🔴 game in ${finalTime} seconds and ${finalClicks} clicks! \nCan you beat my score? 🔴`;
-    window.open(url, '_blank');
-});
-
-document.getElementById('shareFacebook').addEventListener('click', function() {
-    const url = `https://www.facebook.com/sharer/sharer.php?u=yourgameurl.com&quote=I completed the 🔴 game in ${finalTime} seconds and ${finalClicks} clicks! \nCan you beat my score? 🔴`;
-    window.open(url, '_blank');
-});
-
-document.getElementById('copyToClipboard').addEventListener('click', function() {
-    const textToCopy = `I completed the 🔴 game in ${finalTime} seconds and ${finalClicks} clicks! \nCan you beat my score? 🔴`;
-    navigator.clipboard.writeText(textToCopy).then(function() {
-        alert('Result copied to clipboard!');
-    }, function(err) {
-        console.error('Failed to copy text: ', err);
-    });
-});
 
 // Start the game when the script loads
 startGame();
